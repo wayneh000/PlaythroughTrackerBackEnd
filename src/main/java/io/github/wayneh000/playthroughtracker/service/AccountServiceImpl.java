@@ -1,38 +1,67 @@
 package io.github.wayneh000.playthroughtracker.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import java.time.LocalDateTime;
+
 import org.springframework.stereotype.Service;
 
 import io.github.wayneh000.playthroughtracker.entity.Account;
+import io.github.wayneh000.playthroughtracker.exception.InvalidCredentialsException;
+import io.github.wayneh000.playthroughtracker.exception.PlaythroughTrackerException;
+import io.github.wayneh000.playthroughtracker.exception.UserAlreadyExistsException;
+import io.github.wayneh000.playthroughtracker.exception.UserNotFoundException;
 import io.github.wayneh000.playthroughtracker.repository.AccountRepository;
+import io.github.wayneh000.playthroughtracker.util.PasswordUtils;
 
 @Service
 public class AccountServiceImpl implements AccountService {
 
-	@Autowired
 	private AccountRepository accountRepository;
-
-	@Override
-	public Account createAccount(String username, String password) {
-		// TODO Auto-generated method stub
-		return null;
+	
+	private PasswordUtils passwordUtils;
+	
+	public AccountServiceImpl(AccountRepository accountRepository) {
+		this.accountRepository = accountRepository;
+		this.passwordUtils = PasswordUtils.getInstance();
 	}
 
 	@Override
-	public Account findAccount(Integer id) {
-		// TODO Auto-generated method stub
-		return null;
+	public Account createAccount(String username, String password) throws PlaythroughTrackerException {
+		Account account = findAccountByUsername(username);
+		if (account != null)
+			throw new UserAlreadyExistsException();
+		account = new Account();
+		account.setUsername(username);
+		account.setPassword(passwordUtils.hashPassword(password));
+		account.setDateCreated(LocalDateTime.now());
+		return accountRepository.save(account);
 	}
 
 	@Override
-	public Account updateAccount(Integer id, String username, String oldPassword, String newPassword) {
-		// TODO Auto-generated method stub
-		return null;
+	public Account findAccount(Integer id) throws PlaythroughTrackerException {
+		return accountRepository.findById(id).orElseThrow(UserNotFoundException::new);
 	}
 
 	@Override
-	public Account validateAccount(String username, String password) {
-		// TODO Auto-generated method stub
-		return null;
+	public Account updateAccount(Integer id, String username, String oldPassword, String newPassword) throws PlaythroughTrackerException {
+		Account account = findAccount(id);
+		if (!passwordUtils.validatePassword(oldPassword, newPassword))
+			throw new InvalidCredentialsException();
+		account.setUsername(username);
+		account.setPassword(newPassword);
+		return accountRepository.save(account);
+	}
+
+	@Override
+	public Account validateAccount(String username, String password) throws PlaythroughTrackerException {
+		Account account = findAccountByUsername(username);
+		if (account == null)
+			throw new InvalidCredentialsException();
+		if (!passwordUtils.validatePassword(password, account.getPassword()))
+			throw new InvalidCredentialsException();
+		return account;
+	}
+	
+	private Account findAccountByUsername(String username) {
+		return accountRepository.findByUsername(username).orElse(null);
 	}
 }
