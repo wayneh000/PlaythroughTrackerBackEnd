@@ -1,6 +1,6 @@
 package io.github.wayneh000.playthroughtracker.request;
 
-public class NewAccountRequest {
+public class AccountRequest {
 
 	private String username;
 	private String password;
