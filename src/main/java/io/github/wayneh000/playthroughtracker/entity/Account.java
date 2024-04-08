@@ -22,7 +22,7 @@ public class Account {
 	@Column(length = 64, nullable = false)
 	private String password;
 	
-	@Column(columnDefinition = "timestamp default CURRENT_TIMESTAMP", insertable = false, updatable = false)
+	@Column(insertable = false, updatable = false)
 	private LocalDateTime dateCreated;
 
 	public Integer getId() {
