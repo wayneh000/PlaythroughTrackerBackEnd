@@ -1,6 +1,7 @@
 package io.github.wayneh000.playthroughtracker.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,26 +20,29 @@ import io.github.wayneh000.playthroughtracker.service.AccountService;
 @RequestMapping("/api/v1/account")
 public class AccountController {
 
-	@Autowired
 	private AccountService accountService;
 	
+	public AccountController(AccountService accountService) {
+		this.accountService = accountService;
+	}
+	
 	@PostMapping("/createAccount")
-	public Account createAccount(@RequestBody AccountRequest request) throws PlaythroughTrackerException {
-		return accountService.createAccount(request.getUsername(), request.getPassword());
+	public ResponseEntity<Account> createAccount(@RequestBody AccountRequest request) throws PlaythroughTrackerException {
+		return new ResponseEntity<>(accountService.createAccount(request.getUsername(), request.getPassword()), HttpStatus.CREATED);
 	}
 	
 	@GetMapping("/findAccount/{id}")
-	public Account findAccount(@PathVariable Integer id) throws PlaythroughTrackerException {
-		return accountService.findAccount(id);
+	public ResponseEntity<Account> findAccount(@PathVariable Integer id) throws PlaythroughTrackerException {
+		return new ResponseEntity<>(accountService.findAccount(id), HttpStatus.OK);
 	}
 	
 	@PutMapping("/updateAccount")
-	public Account updateAccount(@RequestBody UpdateAccountRequest request) throws PlaythroughTrackerException {
-		return accountService.updateAccount(request.getId(), request.getUsername(), request.getOldPassword(), request.getNewPassword());
+	public ResponseEntity<Account> updateAccount(@RequestBody UpdateAccountRequest request) throws PlaythroughTrackerException {
+		return new ResponseEntity<>(accountService.updateAccount(request.getId(), request.getUsername(), request.getOldPassword(), request.getNewPassword()), HttpStatus.OK);
 	}
 	
 	@GetMapping("/validateAccount")
-	public Account validateAccount(@RequestBody AccountRequest request) throws PlaythroughTrackerException {
-		return accountService.validateAccount(request.getUsername(), request.getPassword());
+	public ResponseEntity<Account> validateAccount(@RequestBody AccountRequest request) throws PlaythroughTrackerException {
+		return new ResponseEntity<>(accountService.validateAccount(request.getUsername(), request.getPassword()), HttpStatus.OK);
 	}
 }
