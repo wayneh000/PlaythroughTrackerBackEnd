@@ -46,6 +46,9 @@ public class AccountServiceImpl implements AccountService {
 		Account account = findAccount(id);
 		if (!passwordUtils.validatePassword(oldPassword, account.getPassword()))
 			throw new InvalidCredentialsException();
+		Account duplicateAccount = accountRepository.findByUsername(username).orElse(null);
+		if (duplicateAccount != null && duplicateAccount.getUsername().equals(account.getUsername()) && !duplicateAccount.getId().equals(account.getId()))
+			throw new UserAlreadyExistsException();
 		account.setUsername(username);
 		account.setPassword(passwordUtils.hashPassword(newPassword));
 		return accountRepository.save(account);
