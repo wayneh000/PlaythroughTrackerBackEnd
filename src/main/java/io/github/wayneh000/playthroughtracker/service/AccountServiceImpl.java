@@ -44,10 +44,10 @@ public class AccountServiceImpl implements AccountService {
 	@Override
 	public Account updateAccount(Integer id, String username, String oldPassword, String newPassword) throws PlaythroughTrackerException {
 		Account account = findAccount(id);
-		if (!passwordUtils.validatePassword(oldPassword, newPassword))
+		if (!passwordUtils.validatePassword(oldPassword, account.getPassword()))
 			throw new InvalidCredentialsException();
 		account.setUsername(username);
-		account.setPassword(newPassword);
+		account.setPassword(passwordUtils.hashPassword(newPassword));
 		return accountRepository.save(account);
 	}
 
